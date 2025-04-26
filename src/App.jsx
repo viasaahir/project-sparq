@@ -1,67 +1,34 @@
-import { useState } from 'react';
-import { mockJobs } from './services/mockJobs.jsx';
-import JobCard from './components/JobCard';
-import AdvancedFilters from './components/AdvancedFilters';
-import RoleArcLogo from './components/RoleArcLogo';
-import LoginDropdown from './components/LoginDropdown';
-import { 
-  HeartIcon,
-  MapPinIcon,
-} from '@heroicons/react/24/outline';
+import { useState, useEffect } from 'react';
+import { Tab } from '@headlessui/react';
+import RoleArcLogo from './components/shared/RoleArcLogo';
+import LoginDropdown from './components/shared/LoginDropdown';
+import ResumeModule from './modules/resume/ResumeModule';
+import JobBoardModule from './modules/jobBoard/JobBoardModule';
+import WelcomeSplash from './components/onboarding/WelcomeSplash';
+import { MapPinIcon } from '@heroicons/react/24/outline';
 
 function App() {
-  const [likedJobs, setLikedJobs] = useState([]);
-  const [viewMode, setViewMode] = useState('list');
-  const [activeFilters, setActiveFilters] = useState({
-    roleType: [],
-    workType: [],
-    hourlyRate: [0, 200],
-    location: ''
-  });
+  const [activeTab, setActiveTab] = useState(0);
+  const [showWelcome, setShowWelcome] = useState(true);
 
-  const handleLikeJob = (job) => {
-    setLikedJobs(prev => {
-      const isLiked = prev.some(likedJob => likedJob.id === job.id);
-      if (isLiked) {
-        return prev.filter(likedJob => likedJob.id !== job.id);
-      }
-      return [job, ...prev];
-    });
+  // Check if user has seen welcome screen before
+  useEffect(() => {
+    const hasSeenWelcome = localStorage.getItem('hasSeenWelcome');
+    if (hasSeenWelcome) {
+      setShowWelcome(false);
+    }
+  }, []);
+
+  const handleWelcomeClose = () => {
+    localStorage.setItem('hasSeenWelcome', 'true');
+    setShowWelcome(false);
   };
-
-  const handleFilterChange = (newFilters) => {
-    setActiveFilters(newFilters);
-  };
-
-  const filteredJobs = mockJobs.filter(job => {
-    // Role Type filter
-    if (activeFilters.roleType.length > 0 && !activeFilters.roleType.includes(job.employmentType)) {
-      return false;
-    }
-
-    // Work Type filter
-    if (activeFilters.workType.length > 0 && !activeFilters.workType.includes(job.workType)) {
-      return false;
-    }
-
-    // Hourly Rate filter
-    if (activeFilters.hourlyRate && job.hourlyRate) {
-      const [min, max] = activeFilters.hourlyRate;
-      if (job.hourlyRate < min || job.hourlyRate > max) {
-        return false;
-      }
-    }
-
-    // Location filter
-    if (activeFilters.location && !job.location.toLowerCase().includes(activeFilters.location.toLowerCase())) {
-      return false;
-    }
-
-    return true;
-  });
 
   return (
     <div className="min-h-screen w-full bg-gray-50">
+      {/* Welcome Splash */}
+      <WelcomeSplash isOpen={showWelcome} onClose={handleWelcomeClose} />
+
       {/* Top Navigation Bar */}
       <div className="bg-black border-b border-gray-800">
         <div className="max-w-7xl mx-auto px-4 py-1.5 sm:px-6 lg:px-8">
@@ -79,18 +46,6 @@ function App() {
             
             {/* Navigation Links */}
             <div className="flex items-center space-x-4">
-              <button 
-                className="flex items-center text-sm text-white hover:text-gray-200 transition-colors relative"
-              >
-                <HeartIcon className="h-4 w-4 mr-1 text-white" />
-                <span>Liked Jobs</span>
-                {likedJobs.length > 0 && (
-                  <span className="ml-1 px-1.5 py-0.5 bg-black text-white rounded-full text-xs font-medium">
-                    {likedJobs.length}
-                  </span>
-                )}
-              </button>
-
               <LoginDropdown />
             </div>
           </div>
@@ -98,32 +53,45 @@ function App() {
       </div>
 
       {/* Main content area */}
-      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        {/* Filters */}
-        <AdvancedFilters 
-          activeFilters={activeFilters} 
-          onFilterChange={handleFilterChange}
-          viewMode={viewMode}
-          onViewModeChange={setViewMode}
-        />
-
-        {/* Job listings */}
-        <div className="w-full">
-          <div className="space-y-4">
-            {filteredJobs.map(job => (
-              <JobCard
-                key={job.id}
-                job={job}
-                onLike={() => handleLikeJob(job)}
-                isLiked={likedJobs.some(likedJob => likedJob.id === job.id)}
-                className="w-full"
-              />
-            ))}
-            {filteredJobs.length === 0 && (
-              <div className="text-center text-gray-500 py-8">No jobs found matching your filters.</div>
-            )}
-          </div>
-        </div>
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <Tab.Group selectedIndex={activeTab} onChange={setActiveTab}>
+          <Tab.List className="flex space-x-1 rounded-xl bg-gray-100 p-1 mb-6">
+            <Tab
+              className={({ selected }) =>
+                `w-full rounded-lg py-2.5 text-sm font-medium leading-5
+                ring-white ring-opacity-60 ring-offset-2 focus:outline-none focus:ring-2
+                ${
+                  selected
+                    ? 'bg-white text-primary-700 shadow'
+                    : 'text-gray-700 hover:bg-white/[0.12] hover:text-primary-600'
+                }`
+              }
+            >
+              Resume Builder & Jobs
+            </Tab>
+            <Tab
+              className={({ selected }) =>
+                `w-full rounded-lg py-2.5 text-sm font-medium leading-5
+                ring-white ring-opacity-60 ring-offset-2 focus:outline-none focus:ring-2
+                ${
+                  selected
+                    ? 'bg-white text-primary-700 shadow'
+                    : 'text-gray-700 hover:bg-white/[0.12] hover:text-primary-600'
+                }`
+              }
+            >
+              Job Board
+            </Tab>
+          </Tab.List>
+          <Tab.Panels>
+            <Tab.Panel>
+              <ResumeModule />
+            </Tab.Panel>
+            <Tab.Panel>
+              <JobBoardModule />
+            </Tab.Panel>
+          </Tab.Panels>
+        </Tab.Group>
       </main>
     </div>
   );
