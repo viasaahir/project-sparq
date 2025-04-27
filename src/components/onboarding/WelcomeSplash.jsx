@@ -13,13 +13,13 @@ const FeatureHighlight = ({ icon: Icon, title, description, delay }) => (
     transition={{ delay }}
   >
     <div className="flex-shrink-0">
-      <div className="p-3 bg-indigo-500/20 rounded-lg">
-        <Icon className="w-6 h-6 text-indigo-400" />
+      <div className="p-3 bg-indigo-100 rounded-lg">
+        <Icon className="w-6 h-6 text-indigo-600" />
       </div>
     </div>
     <div>
-      <h3 className="font-medium text-gray-100">{title}</h3>
-      <p className="mt-1 text-sm text-gray-400">{description}</p>
+      <h3 className="font-medium text-gray-900">{title}</h3>
+      <p className="mt-1 text-sm text-gray-500">{description}</p>
     </div>
   </motion.div>
 );
@@ -52,78 +52,127 @@ const WelcomeSplash = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-900 flex items-center justify-center">
-      <AnimatePresence>
-        {isOpen && (
-          <Dialog
-            as={motion.div}
-            static
-            className="fixed inset-0 z-10 overflow-y-auto"
-            open={isOpen}
-            onClose={() => {}}
+    <AnimatePresence>
+      {isOpen && (
+        <Dialog
+          static
+          as={motion.div}
+          open={isOpen}
+          onClose={() => {}}
+          className="relative z-50"
+        >
+          {/* Animated Backdrop */}
+          <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
+            className="fixed inset-0"
           >
-            <div className="min-h-screen text-center">
-              <Dialog.Overlay 
-                as={motion.div}
-                className="fixed inset-0 bg-black/75"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
+            {/* Gradient background */}
+            <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-gray-900 to-indigo-900" />
+            
+            {/* Animated particles */}
+            {[...Array(20)].map((_, i) => (
+              <motion.div
+                key={i}
+                className="absolute w-1 h-1 bg-indigo-500 rounded-full"
+                initial={{
+                  x: Math.random() * window.innerWidth,
+                  y: Math.random() * window.innerHeight,
+                  opacity: 0,
+                }}
+                animate={{
+                  y: [null, -20],
+                  opacity: [0, 1, 0],
+                }}
+                transition={{
+                  duration: 2 + Math.random() * 2,
+                  repeat: Infinity,
+                  delay: Math.random() * 2,
+                  ease: "easeInOut",
+                }}
               />
+            ))}
+          </motion.div>
 
-              <div className="inline-block w-full max-w-2xl p-6 my-8 text-left align-middle transition-all transform bg-gray-900 shadow-xl rounded-2xl border border-gray-800">
-                {/* Logo */}
-                <div className="mx-auto flex justify-center mb-8">
-                  <RollyIcon className="w-16 h-16 text-indigo-400" />
-                </div>
+          {/* Modal */}
+          <div className="fixed inset-0 flex items-center justify-center p-4">
+            <Dialog.Panel
+              as={motion.div}
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="relative bg-white/90 backdrop-blur-xl rounded-2xl shadow-2xl max-w-2xl w-full p-8 overflow-hidden"
+            >
+              {/* Animated Logo */}
+              <motion.div 
+                className="flex justify-center mb-6"
+                initial={{ y: -20 }}
+                animate={{ y: 0 }}
+                transition={{ type: "spring", bounce: 0.5 }}
+              >
+                <RollyIcon width={96} height={96} />
+              </motion.div>
 
-                {/* Title */}
-                <Dialog.Title
-                  as="h3"
-                  className="text-3xl font-bold text-center text-white mb-4"
-                >
+              {/* Content */}
+              <motion.div 
+                className="text-center mb-8"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+              >
+                <Dialog.Title className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-indigo-400 mb-4">
                   Welcome to RoleArc
                 </Dialog.Title>
+                <Dialog.Description className="text-lg text-gray-600 max-w-xl mx-auto">
+                  Your AI-powered career companion. We scan your resume and deliver smart, personalized job matches to help you land your next big opportunity.
+                </Dialog.Description>
+              </motion.div>
 
-                {/* Subtitle */}
-                <p className="text-center text-gray-400 mb-8">
-                  Your AI-powered career companion
-                </p>
-
-                {/* Features */}
-                <div className="space-y-6 mb-8">
-                  {features.map((feature, index) => (
-                    <FeatureHighlight
-                      key={feature.title}
-                      icon={feature.icon}
-                      title={feature.title}
-                      description={feature.description}
-                      delay={0.2 + index * 0.1}
-                    />
-                  ))}
-                </div>
-
-                {/* Get Started Button */}
-                <div className="mt-8 flex justify-center">
-                  <motion.button
-                    type="button"
-                    className="inline-flex items-center px-6 py-3 text-lg font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg transition-colors"
-                    onClick={handleGetStarted}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                  >
-                    Get Started
-                  </motion.button>
-                </div>
+              {/* Feature Highlights */}
+              <div className="mb-8 space-y-6">
+                {features.map((feature, index) => (
+                  <FeatureHighlight
+                    key={index}
+                    icon={feature.icon}
+                    title={feature.title}
+                    description={feature.description}
+                    delay={0.5 + index * 0.2}
+                  />
+                ))}
               </div>
-            </div>
-          </Dialog>
-        )}
-      </AnimatePresence>
-    </div>
+
+              {/* Action Button */}
+              <motion.div 
+                className="flex flex-col items-center gap-2"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.6 }}
+              >
+                <button
+                  onClick={handleGetStarted}
+                  className="px-6 py-3 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-500 transition-colors"
+                >
+                  Get Started
+                </button>
+                {/* Neetly credit */}
+                <p className="text-xs text-gray-400/60 mt-4">
+                  Made possible by{' '}
+                  <a
+                    href="https://www.neetly.co"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-indigo-400/80 hover:text-indigo-300 transition-colors"
+                  >
+                    Neetly
+                  </a>
+                </p>
+              </motion.div>
+            </Dialog.Panel>
+          </div>
+        </Dialog>
+      )}
+    </AnimatePresence>
   );
 };
 
