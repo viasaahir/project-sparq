@@ -2,19 +2,43 @@ import React, { useState } from 'react';
 import { Dialog } from '@headlessui/react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiUpload } from 'react-icons/fi';
+import { HiOutlineLightBulb, HiOutlineDocumentSearch, HiOutlineClipboardCheck } from 'react-icons/hi';
 import AuthModal from '../shared/AuthModal';
 import AnimatedRoleArcLogo from '../shared/AnimatedRoleArcLogo';
+import ResumeUpload from '../resume/ResumeUpload';
+import ResumeAnalysis from '../resume/ResumeAnalysis';
+
+const FeatureHighlight = ({ icon: Icon, title, description, delay }) => (
+  <motion.div
+    className="flex items-start space-x-4 text-left"
+    initial={{ opacity: 0, y: 20 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ delay }}
+  >
+    <div className="flex-shrink-0">
+      <div className="p-3 bg-indigo-100 rounded-lg">
+        <Icon className="w-6 h-6 text-indigo-600" />
+      </div>
+    </div>
+    <div>
+      <h3 className="font-medium text-gray-900">{title}</h3>
+      <p className="mt-1 text-sm text-gray-500">{description}</p>
+    </div>
+  </motion.div>
+);
 
 const WelcomeSplash = ({ isOpen, onClose }) => {
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
+  const [showResumeUpload, setShowResumeUpload] = useState(false);
+  const [showResumeAnalysis, setShowResumeAnalysis] = useState(false);
 
   const steps = [
     {
       title: "Welcome to RoleArc",
-      description: "Your AI-powered career companion. We help you find the perfect job match by analyzing your resume and providing personalized recommendations.",
+      description: "Your AI-powered career companion. We scan your resume and deliver smart, personalized job matches to help you land your next big opportunity.",
       action: "Get Started",
-      onAction: () => setCurrentStep(1)
+      onAction: () => setShowResumeUpload(true)
     },
     {
       title: "First, Let's Create Your Profile",
@@ -24,7 +48,42 @@ const WelcomeSplash = ({ isOpen, onClose }) => {
     }
   ];
 
+  const features = [
+    {
+      icon: HiOutlineDocumentSearch,
+      title: "Smart Resume Analysis",
+      description: "Our AI analyzes your resume to match you with the perfect job opportunities.",
+    },
+    {
+      icon: HiOutlineLightBulb,
+      title: "AI-Powered Recommendations",
+      description: "Get personalized suggestions to improve your resume and boost your chances.",
+    },
+    {
+      icon: HiOutlineClipboardCheck,
+      title: "Tailored Job Matching",
+      description: "Find roles that match your skills, experience, and career goals.",
+    },
+  ];
+
   const currentContent = steps[currentStep];
+
+  if (showResumeAnalysis) {
+    return <ResumeAnalysis />;
+  }
+
+  if (showResumeUpload) {
+    return (
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="fixed inset-0 bg-gradient-to-br from-gray-900 via-gray-900 to-indigo-900 flex items-center justify-center p-4"
+      >
+        <ResumeUpload onAnalysisComplete={() => setShowResumeAnalysis(true)} />
+      </motion.div>
+    );
+  }
 
   return (
     <>
@@ -100,47 +159,24 @@ const WelcomeSplash = ({ isOpen, onClose }) => {
                   <Dialog.Title className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-indigo-400 mb-4">
                     {currentContent.title}
                   </Dialog.Title>
-                  <Dialog.Description className="text-lg text-gray-600">
+                  <Dialog.Description className="text-lg text-gray-600 max-w-xl mx-auto">
                     {currentContent.description}
                   </Dialog.Description>
                 </motion.div>
 
-                {/* Animation */}
+                {/* Feature Highlights */}
                 {currentStep === 0 && (
-                  <motion.div
-                    className="w-full h-48 mb-8 flex items-center justify-center"
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.5 }}
-                  >
-                    <div className="relative">
-                      <motion.div
-                        className="absolute inset-0 flex items-center justify-center"
-                        animate={{
-                          y: [0, -10, 0],
-                        }}
-                        transition={{
-                          duration: 2,
-                          repeat: Infinity,
-                          ease: "easeInOut",
-                        }}
-                      >
-                        <FiUpload className="w-24 h-24 text-primary-500" />
-                      </motion.div>
-                      <motion.div
-                        className="absolute inset-0 border-2 border-dashed border-primary-300 rounded-lg"
-                        animate={{
-                          scale: [1, 1.05, 1],
-                          opacity: [1, 0.8, 1],
-                        }}
-                        transition={{
-                          duration: 2,
-                          repeat: Infinity,
-                          ease: "easeInOut",
-                        }}
+                  <div className="mb-8 space-y-6">
+                    {features.map((feature, index) => (
+                      <FeatureHighlight
+                        key={index}
+                        icon={feature.icon}
+                        title={feature.title}
+                        description={feature.description}
+                        delay={0.5 + index * 0.2}
                       />
-                    </div>
-                  </motion.div>
+                    ))}
+                  </div>
                 )}
 
                 {/* Action Button */}

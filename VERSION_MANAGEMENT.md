@@ -2,6 +2,14 @@
 
 ## Important Versions
 
+### JobProductV1.6 (Latest)
+Enhanced version with animated welcome splash screen and improved UI.
+
+To switch to this version:
+```bash
+git checkout v1.0.0
+```
+
 ### JobProductV1.3 (Development)
 Current development branch for new features.
 
@@ -44,11 +52,20 @@ git checkout -b feature/dropdowns
 
 ## Version History
 
+- **JobProductV1.6 (v1.0.0)**: Added animated welcome splash screen with enhanced UI
 - **JobProductV1.3**: Development branch for new features (in progress)
 - **v1.2**: Added Login/Sign Up dropdown with email/password form and styling
 - **v1.1-backup**: Clean version with working job board, swipe functionality, and original header design
 - **JobProductV1.1**: Enhanced version with liked jobs feature
 - **JobProductV1**: Initial version with basic swipe functionality
+
+## Features Added in v1.0.0 (JobProductV1.6)
+- Animated welcome splash screen with particle effects
+- Dynamic RoleArc logo with scanning and blinking animations
+- Two-step onboarding flow with auth integration
+- Modern UI with gradients and glass effects
+- Improved button interactions and hover states
+- Smooth transitions and staggered animations
 
 ## Features Added in v1.2
 - Login/Sign Up dropdown with email and password fields
@@ -61,5 +78,6 @@ git checkout -b feature/dropdowns
 - Always create a new branch when working on new features
 - If something goes wrong, you can always return to the clean backup using `git checkout v1.1-backup`
 - After switching branches, make sure to restart the development server with `npm run dev`
+- JobProductV1.6 (v1.0.0) is our latest version with animated welcome screen
 - JobProductV1.2 (v1.2) is our stable version with working dropdown functionality
 - JobProductV1.3 is our current development branch for new features
