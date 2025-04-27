@@ -1,191 +1,250 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { Tab } from '@headlessui/react';
+import { motion } from 'framer-motion';
+import { HiOutlineFire, HiOutlineChartBar } from 'react-icons/hi';
+import JobSearch from '../../components/jobs/JobSearch';
+import InternPortal from '../../components/jobs/InternPortal';
+import JobCard from '../../components/jobs/JobCard';
+import RollyIcon from '../../components/shared/RollyIcon';
 import { mockJobs } from '../../services/mockJobs';
-import JobCard from '../../components/jobBoard/JobCard';
-import { 
-  AdjustmentsHorizontalIcon,
-  XMarkIcon 
-} from '@heroicons/react/24/outline';
+
+function classNames(...classes) {
+  return classes.filter(Boolean).join(' ');
+}
+
+const mockConnections = [
+  {
+    id: 1,
+    name: "Sarah Chen",
+    role: "Senior Software Engineer",
+    avatar: "https://randomuser.me/api/portraits/women/1.jpg",
+    degree: 1
+  },
+  {
+    id: 2,
+    name: "Michael Rodriguez",
+    role: "Engineering Manager",
+    avatar: "https://randomuser.me/api/portraits/men/2.jpg",
+    degree: 2
+  }
+];
+
+const mockConsultants = [
+  {
+    id: 1,
+    name: "David Kim",
+    role: "Technical Recruiter",
+    avatar: "https://randomuser.me/api/portraits/men/3.jpg"
+  },
+  {
+    id: 2,
+    name: "Emily Johnson",
+    role: "Senior Product Manager",
+    avatar: "https://randomuser.me/api/portraits/women/4.jpg"
+  }
+];
 
 const JobBoardModule = () => {
-  const [filters, setFilters] = useState({
-    roleType: [],
-    workType: [],
-    experienceLevel: [],
-    salary: {
-      min: 0,
-      max: 200000,
-      type: 'yearly' // yearly, hourly
-    },
-    location: '',
-    remote: false,
-    skills: [],
-    company: '',
-    postedWithin: 'any', // any, day, week, month
-  });
+  const [jobs, setJobs] = useState([]);
+  const [trendingJobs, setTrendingJobs] = useState([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [selectedTab, setSelectedTab] = useState(0);
 
-  const [showFilters, setShowFilters] = useState(true);
+  useEffect(() => {
+    // Set initial trending jobs
+    const trending = mockJobs
+      .sort(() => Math.random() - 0.5)
+      .slice(0, 3);
+    setTrendingJobs(trending);
+  }, []);
 
-  const handleFilterChange = (key, value) => {
-    setFilters(prev => ({
-      ...prev,
-      [key]: value
-    }));
+  const handleSearch = async (prompt) => {
+    setIsSearching(true);
+    
+    // TODO: Replace with actual API call
+    // Simulating API call with mock data
+    setTimeout(() => {
+      const filteredJobs = mockJobs.filter(job => {
+        const searchTerms = prompt.toLowerCase();
+        const matchesExperience = searchTerms.includes(job.experienceLevel.toLowerCase());
+        const matchesSalary = job.salary >= (searchTerms.includes('120k') ? 120000 : 0);
+        const matchesLocation = searchTerms.includes(job.location.toLowerCase());
+        const matchesType = job.employmentType.toLowerCase().includes(
+          searchTerms.includes('intern') ? 'intern' : 'full-time'
+        );
+        
+        return matchesExperience || matchesSalary || matchesLocation || matchesType;
+      });
+      
+      setJobs(filteredJobs);
+      setIsSearching(false);
+    }, 1500);
   };
 
-  const filteredJobs = mockJobs.filter(job => {
-    if (filters.roleType.length && !filters.roleType.includes(job.employmentType)) return false;
-    if (filters.workType.length && !filters.workType.includes(job.workType)) return false;
-    if (filters.experienceLevel.length && !filters.experienceLevel.includes(job.experienceLevel)) return false;
-    if (filters.remote && !job.isRemote) return false;
-    if (filters.location && !job.location.toLowerCase().includes(filters.location.toLowerCase())) return false;
-    if (filters.company && !job.company.toLowerCase().includes(filters.company.toLowerCase())) return false;
-    
-    // Salary filter
-    if (job.salary) {
-      const jobSalary = typeof job.salary === 'number' ? job.salary : parseInt(job.salary.replace(/[^0-9]/g, ''));
-      if (jobSalary < filters.salary.min || jobSalary > filters.salary.max) return false;
-    }
-
-    // Skills filter
-    if (filters.skills.length && !filters.skills.every(skill => 
-      job.requirements.some(req => req.toLowerCase().includes(skill.toLowerCase()))
-    )) return false;
-
-    return true;
-  });
-
   return (
-    <div className="flex gap-6">
-      {/* Filters Sidebar */}
-      <div className={`w-80 flex-shrink-0 transition-all duration-300 ${showFilters ? 'translate-x-0' : '-translate-x-full'}`}>
-        <div className="bg-white rounded-lg shadow p-6 space-y-6 sticky top-6">
-          <div className="flex items-center justify-between">
-            <h3 className="text-lg font-medium text-gray-900">Filters</h3>
-            <button
-              onClick={() => setShowFilters(false)}
-              className="text-gray-400 hover:text-gray-500"
-            >
-              <XMarkIcon className="h-5 w-5" />
-            </button>
-          </div>
-
-          {/* Role Type */}
-          <div>
-            <label className="text-sm font-medium text-gray-700">Role Type</label>
-            <select
-              className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm rounded-md"
-              value={filters.roleType}
-              onChange={(e) => handleFilterChange('roleType', Array.from(e.target.selectedOptions, option => option.value))}
-              multiple
-            >
-              <option value="full-time">Full Time</option>
-              <option value="part-time">Part Time</option>
-              <option value="contract">Contract</option>
-              <option value="internship">Internship</option>
-            </select>
-          </div>
-
-          {/* Experience Level */}
-          <div>
-            <label className="text-sm font-medium text-gray-700">Experience Level</label>
-            <select
-              className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm rounded-md"
-              value={filters.experienceLevel}
-              onChange={(e) => handleFilterChange('experienceLevel', Array.from(e.target.selectedOptions, option => option.value))}
-              multiple
-            >
-              <option value="entry">Entry Level</option>
-              <option value="mid">Mid Level</option>
-              <option value="senior">Senior Level</option>
-              <option value="lead">Lead</option>
-            </select>
-          </div>
-
-          {/* Salary Range */}
-          <div>
-            <label className="text-sm font-medium text-gray-700">Salary Range</label>
-            <div className="mt-1 grid grid-cols-2 gap-4">
-              <input
-                type="number"
-                placeholder="Min"
-                className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
-                value={filters.salary.min}
-                onChange={(e) => handleFilterChange('salary', { ...filters.salary, min: parseInt(e.target.value) })}
-              />
-              <input
-                type="number"
-                placeholder="Max"
-                className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
-                value={filters.salary.max}
-                onChange={(e) => handleFilterChange('salary', { ...filters.salary, max: parseInt(e.target.value) })}
-              />
+    <div className="min-h-screen bg-gray-900">
+      {/* Header with RoleArc branding */}
+      <div className="bg-gradient-to-b from-black to-gray-900 border-b border-gray-800">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="flex flex-col items-center justify-center text-center">
+            <div className="flex items-center gap-4 mb-6">
+              <RollyIcon width={48} height={48} />
+              <h1 className="text-4xl font-bold text-white">RoleArc</h1>
             </div>
-          </div>
-
-          {/* Location */}
-          <div>
-            <label className="text-sm font-medium text-gray-700">Location</label>
-            <input
-              type="text"
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
-              placeholder="City, State, or Country"
-              value={filters.location}
-              onChange={(e) => handleFilterChange('location', e.target.value)}
-            />
-          </div>
-
-          {/* Remote Option */}
-          <div className="flex items-center">
-            <input
-              type="checkbox"
-              className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
-              checked={filters.remote}
-              onChange={(e) => handleFilterChange('remote', e.target.checked)}
-            />
-            <label className="ml-2 text-sm text-gray-700">Remote Only</label>
-          </div>
-
-          {/* Skills */}
-          <div>
-            <label className="text-sm font-medium text-gray-700">Required Skills</label>
-            <input
-              type="text"
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
-              placeholder="Add skills (comma separated)"
-              value={filters.skills.join(', ')}
-              onChange={(e) => handleFilterChange('skills', e.target.value.split(',').map(s => s.trim()).filter(Boolean))}
-            />
+            <p className="text-xl text-gray-400 max-w-2xl">
+              Discover your next career opportunity with personalized job matches and industry insights
+            </p>
           </div>
         </div>
       </div>
 
-      {/* Job Listings */}
-      <div className="flex-1">
-        {!showFilters && (
-          <button
-            onClick={() => setShowFilters(true)}
-            className="mb-4 inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
-          >
-            <AdjustmentsHorizontalIcon className="h-4 w-4 mr-2" />
-            Show Filters
-          </button>
-        )}
-        
-        <div className="space-y-4">
-          {filteredJobs.map(job => (
-            <JobCard
-              key={job.id}
-              job={job}
-              className="w-full"
-            />
-          ))}
-          {filteredJobs.length === 0 && (
-            <div className="text-center py-12 bg-white rounded-lg shadow">
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No jobs found</h3>
-              <p className="text-gray-500">Try adjusting your filters to see more results</p>
-            </div>
-          )}
-        </div>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <Tab.Group selectedIndex={selectedTab} onChange={setSelectedTab}>
+          <Tab.List className="flex space-x-2 rounded-xl bg-white/5 p-1 mb-12">
+            <Tab
+              className={({ selected }) =>
+                classNames(
+                  'w-full rounded-lg py-2.5 text-sm font-medium leading-5',
+                  'ring-white/60 ring-offset-2 ring-offset-indigo-400 focus:outline-none',
+                  selected
+                    ? 'bg-white text-indigo-600 shadow'
+                    : 'text-gray-400 hover:bg-white/[0.12] hover:text-white'
+                )
+              }
+            >
+              Professional Roles
+            </Tab>
+            <Tab
+              className={({ selected }) =>
+                classNames(
+                  'w-full rounded-lg py-2.5 text-sm font-medium leading-5',
+                  'ring-white/60 ring-offset-2 ring-offset-indigo-400 focus:outline-none',
+                  selected
+                    ? 'bg-white text-indigo-600 shadow'
+                    : 'text-gray-400 hover:bg-white/[0.12] hover:text-white'
+                )
+              }
+            >
+              Student Opportunities
+            </Tab>
+          </Tab.List>
+
+          <Tab.Panels>
+            {/* Professional Roles Panel */}
+            <Tab.Panel>
+              <div className="space-y-12">
+                <JobSearch onSearch={handleSearch} isProcessing={isSearching} />
+                
+                {/* Trending Roles Section */}
+                {!jobs.length && trendingJobs.length > 0 && (
+                  <div>
+                    <div className="flex items-center gap-2 mb-6">
+                      <HiOutlineFire className="w-6 h-6 text-orange-500" />
+                      <h2 className="text-xl font-semibold text-white">Trending Roles</h2>
+                    </div>
+                    <div className="grid gap-6">
+                      {trendingJobs.map((job) => (
+                        <JobCard 
+                          key={job.id} 
+                          job={job}
+                          connections={mockConnections}
+                          consultants={mockConsultants}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )}
+                
+                {/* Search Results */}
+                {isSearching ? (
+                  <div className="text-center text-gray-400">
+                    <motion.div
+                      animate={{ rotate: 360 }}
+                      transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                      className="mx-auto w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full"
+                    />
+                    <p className="mt-4">Finding the perfect roles for you...</p>
+                  </div>
+                ) : jobs.length > 0 ? (
+                  <div>
+                    <div className="flex items-center gap-2 mb-6">
+                      <HiOutlineChartBar className="w-6 h-6 text-indigo-400" />
+                      <h2 className="text-xl font-semibold text-white">Matched Roles</h2>
+                    </div>
+                    <div className="grid gap-6">
+                      {jobs.map((job) => (
+                        <JobCard 
+                          key={job.id} 
+                          job={job}
+                          connections={mockConnections}
+                          consultants={mockConsultants}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                ) : null}
+              </div>
+            </Tab.Panel>
+
+            {/* Student Opportunities Panel */}
+            <Tab.Panel>
+              <div className="space-y-12">
+                <InternPortal onSearch={handleSearch} />
+                
+                {/* Trending Internships */}
+                {!jobs.length && trendingJobs.length > 0 && (
+                  <div>
+                    <div className="flex items-center gap-2 mb-6">
+                      <HiOutlineFire className="w-6 h-6 text-orange-500" />
+                      <h2 className="text-xl font-semibold text-white">Featured Opportunities</h2>
+                    </div>
+                    <div className="grid gap-6">
+                      {trendingJobs
+                        .filter(job => job.employmentType === "Internship")
+                        .map((job) => (
+                          <JobCard 
+                            key={job.id} 
+                            job={job}
+                            connections={mockConnections}
+                            consultants={mockConsultants}
+                          />
+                        ))}
+                    </div>
+                  </div>
+                )}
+                
+                {/* Search Results */}
+                {isSearching ? (
+                  <div className="text-center text-gray-400">
+                    <motion.div
+                      animate={{ rotate: 360 }}
+                      transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                      className="mx-auto w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full"
+                    />
+                    <p className="mt-4">Finding internship opportunities...</p>
+                  </div>
+                ) : jobs.length > 0 ? (
+                  <div>
+                    <div className="flex items-center gap-2 mb-6">
+                      <HiOutlineChartBar className="w-6 h-6 text-indigo-400" />
+                      <h2 className="text-xl font-semibold text-white">Matched Opportunities</h2>
+                    </div>
+                    <div className="grid gap-6">
+                      {jobs.map((job) => (
+                        <JobCard 
+                          key={job.id} 
+                          job={job}
+                          connections={mockConnections}
+                          consultants={mockConsultants}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                ) : null}
+              </div>
+            </Tab.Panel>
+          </Tab.Panels>
+        </Tab.Group>
       </div>
     </div>
   );
