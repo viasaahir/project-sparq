@@ -1,166 +1,221 @@
-import React, { useCallback, useState } from 'react';
+import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useDropzone } from 'react-dropzone';
-import { motion } from 'framer-motion';
-import { HiOutlineUpload, HiOutlineLightningBolt, HiOutlineDocumentSearch, HiOutlineClipboardCheck } from 'react-icons/hi';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import { HiOutlineUpload, HiOutlineDocumentText, HiOutlineLightBulb, HiOutlineChartBar, HiOutlineCheckCircle, HiArrowRight } from 'react-icons/hi';
 
-const ResumeUpload = ({ onUploadComplete }) => {
+const ResumeUpload = () => {
+  const navigate = useNavigate();
   const [file, setFile] = useState(null);
-  const [uploadStatus, setUploadStatus] = useState('idle');
-  const [isHovering, setIsHovering] = useState(false);
-  const [analysisSteps, setAnalysisSteps] = useState([
-    { icon: HiOutlineLightningBolt, title: 'Processing Resume', status: 'pending' },
-    { icon: HiOutlineDocumentSearch, title: 'Extracting Skills', status: 'pending' },
-    { icon: HiOutlineClipboardCheck, title: 'Generating Recommendations', status: 'pending' }
-  ]);
+  const [analysis, setAnalysis] = useState(null);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
 
-  const onDrop = useCallback((acceptedFiles) => {
-    if (acceptedFiles?.length) {
-      setFile(acceptedFiles[0]);
-      setUploadStatus('uploading');
-      setTimeout(() => {
-        setUploadStatus('analyzing');
-        simulateAnalysis();
-      }, 1500);
-    }
-  }, []);
-
-  const simulateAnalysis = () => {
-    setTimeout(() => {
-      setAnalysisSteps(steps => steps.map((step, i) => 
-        i === 0 ? { ...step, status: 'processing' } : step
-      ));
-    }, 1000);
-
-    setTimeout(() => {
-      setAnalysisSteps(steps => steps.map((step, i) => 
-        i === 0 ? { ...step, status: 'complete' } : 
-        i === 1 ? { ...step, status: 'processing' } : step
-      ));
-    }, 3000);
-
-    setTimeout(() => {
-      setAnalysisSteps(steps => steps.map((step, i) => 
-        i <= 1 ? { ...step, status: 'complete' } : 
-        i === 2 ? { ...step, status: 'processing' } : step
-      ));
-    }, 5000);
-
-    setTimeout(() => {
-      setAnalysisSteps(steps => steps.map(step => ({ ...step, status: 'complete' })));
-      setUploadStatus('complete');
-      if (onUploadComplete) {
-        onUploadComplete();
-      }
-    }, 6000);
+  const analyzeResume = async (file) => {
+    setIsAnalyzing(true);
+    // Simulated analysis - replace with actual API call
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    
+    setAnalysis({
+      keySkills: [
+        'React.js',
+        'Node.js',
+        'Python',
+        'Data Analysis',
+        'Project Management'
+      ],
+      recommendations: [
+        'Add quantifiable achievements to highlight impact',
+        'Include specific examples of leadership experience',
+        'Enhance technical skills section with proficiency levels',
+        'Add relevant certifications section'
+      ],
+      strengths: [
+        'Strong technical background',
+        'Clear project descriptions',
+        'Good education section'
+      ],
+      improvements: [
+        'Work experience could be more detailed',
+        'Missing relevant keywords for target roles',
+        'Professional summary needs focus'
+      ]
+    });
+    setIsAnalyzing(false);
   };
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    onDrop,
     accept: {
       'application/pdf': ['.pdf'],
       'application/msword': ['.doc'],
       'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx']
     },
     maxFiles: 1,
-    onDragEnter: () => setIsHovering(true),
-    onDragLeave: () => setIsHovering(false),
-    onDropAccepted: () => setIsHovering(false)
+    onDrop: async (acceptedFiles) => {
+      const uploadedFile = acceptedFiles[0];
+      setFile(uploadedFile);
+      await analyzeResume(uploadedFile);
+    }
   });
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] bg-primary-900 flex flex-col items-center justify-center p-8">
-      <div className="max-w-3xl w-full mx-auto text-center">
-        {/* Header */}
+    <div className="min-h-screen bg-[#0f172a]">
+      <div className="max-w-4xl mx-auto px-4 py-12">
         <motion.div
-          className="mb-12"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
+          className="text-center mb-8"
         >
-          <h1 className="text-4xl font-bold text-white mb-4">
-            Welcome to RoleArc
-          </h1>
-          <p className="text-xl text-gray-300 mb-6">
-            Get personalized job matches by uploading your resume
+          <h1 className="text-4xl font-bold text-white mb-4">Upload Your Resume</h1>
+          <p className="text-xl text-gray-300">
+            Get instant insights and recommendations to improve your job search
           </p>
         </motion.div>
 
         {/* Upload Area */}
-        <div className="relative">
-          <motion.div
-            {...getRootProps()}
-            className={`
-              relative rounded-xl border-2 border-dashed p-12 text-center
-              ${isDragActive ? 'border-indigo-400 bg-indigo-400/10' : 'border-gray-600 hover:border-indigo-500'}
-              ${file ? 'border-green-500 bg-green-50/10' : ''}
-              transition-colors cursor-pointer
-            `}
-            initial={{ y: 20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ delay: 0.2 }}
-          >
-            <input {...getInputProps()} />
-            
-            <div className="space-y-4">
-              <div className="flex flex-col items-center gap-4">
-                <motion.div
-                  className="w-16 h-16 border-2 border-dashed border-indigo-400 rounded-lg flex items-center justify-center"
-                  animate={isHovering ? { scale: [1, 1.1, 1] } : {}}
-                  transition={{ duration: 0.5, repeat: Infinity }}
-                >
-                  <HiOutlineUpload className="w-8 h-8 text-indigo-400" />
-                </motion.div>
-                <div className="space-y-2">
-                  <p className="text-lg font-medium text-white">
-                    {file ? file.name :
-                      uploadStatus === 'idle' ? 'Drop your resume here' :
-                      uploadStatus === 'uploading' ? 'Uploading...' :
-                      uploadStatus === 'analyzing' ? 'Analyzing your resume...' :
-                      'Analysis complete!'
-                    }
-                  </p>
-                  <p className="text-sm text-gray-400">
-                    Support for PDF, DOC, and DOCX files
-                  </p>
-                </div>
+        <div
+          {...getRootProps()}
+          className={`
+            relative rounded-xl p-12 text-center cursor-pointer
+            ${isDragActive ? 'bg-indigo-500/10' : 'bg-[#0a1120]/50 hover:bg-[#0a1120]/70'}
+            transition-all duration-200
+          `}
+        >
+          <input {...getInputProps()} />
+          <div className="space-y-4">
+            <div className="flex flex-col items-center gap-4">
+              <div className="p-4 rounded-full bg-indigo-500/20">
+                <HiOutlineUpload className="w-8 h-8 text-indigo-400" />
               </div>
-
-              {/* Analysis Steps */}
-              {file && (
-                <motion.div 
-                  className="mt-8 space-y-4"
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                >
-                  {analysisSteps.map((step, index) => (
-                    <div
-                      key={step.title}
-                      className="flex items-center justify-center gap-3 text-gray-300"
-                    >
-                      <step.icon className={`w-5 h-5 ${
-                        step.status === 'complete' ? 'text-green-400' :
-                        step.status === 'processing' ? 'text-indigo-400 animate-pulse' :
-                        'text-gray-500'
-                      }`} />
-                      <span>{step.title}</span>
-                    </div>
-                  ))}
-                </motion.div>
-              )}
+              <div>
+                <p className="text-lg font-medium text-white">
+                  {file ? file.name : 'Drag & drop your resume here'}
+                </p>
+                <p className="mt-2 text-sm text-gray-300">
+                  Supports PDF, DOC, and DOCX files
+                </p>
+              </div>
             </div>
-
-            {/* Upload Progress Indicator */}
-            {uploadStatus !== 'idle' && (
-              <motion.div
-                className="absolute inset-x-0 bottom-0 h-1 bg-indigo-500/20"
-                initial={{ scaleX: 0 }}
-                animate={{ scaleX: uploadStatus === 'complete' ? 1 : [0, 0.5, 0.8] }}
-                transition={{ duration: uploadStatus === 'complete' ? 0.5 : 2, repeat: uploadStatus === 'complete' ? 0 : Infinity }}
-              />
-            )}
-          </motion.div>
+          </div>
         </div>
+
+        {/* Analysis Results */}
+        <AnimatePresence>
+          {isAnalyzing && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="mt-8 p-6 rounded-lg bg-[#0a1120]/50"
+            >
+              <div className="flex items-center justify-center gap-3">
+                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-indigo-400" />
+                <p className="text-white">Analyzing your resume...</p>
+              </div>
+            </motion.div>
+          )}
+
+          {analysis && !isAnalyzing && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="mt-8 space-y-6"
+            >
+              {/* Key Skills */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="p-6 rounded-lg bg-[#0a1120]/50"
+              >
+                <div className="flex items-center gap-3 mb-4">
+                  <HiOutlineDocumentText className="w-6 h-6 text-indigo-400" />
+                  <h2 className="text-xl font-semibold text-white">Key Skills Identified</h2>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {analysis.keySkills.map((skill) => (
+                    <span key={skill} className="px-3 py-1 rounded-full bg-indigo-500/20 text-indigo-300 text-sm">
+                      {skill}
+                    </span>
+                  ))}
+                </div>
+              </motion.div>
+
+              {/* Recommendations */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 }}
+                className="p-6 rounded-lg bg-[#0a1120]/50"
+              >
+                <div className="flex items-center gap-3 mb-4">
+                  <HiOutlineLightBulb className="w-6 h-6 text-indigo-400" />
+                  <h2 className="text-xl font-semibold text-white">Recommendations</h2>
+                </div>
+                <ul className="space-y-3">
+                  {analysis.recommendations.map((rec) => (
+                    <li key={rec} className="flex items-start gap-2 text-gray-300">
+                      <HiOutlineCheckCircle className="w-5 h-5 text-indigo-400 mt-0.5 flex-shrink-0" />
+                      <span>{rec}</span>
+                    </li>
+                  ))}
+                </ul>
+              </motion.div>
+
+              {/* Strengths & Improvements */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+                className="grid md:grid-cols-2 gap-6"
+              >
+                <div className="p-6 rounded-lg bg-[#0a1120]/50">
+                  <div className="flex items-center gap-3 mb-4">
+                    <HiOutlineChartBar className="w-6 h-6 text-green-400" />
+                    <h2 className="text-xl font-semibold text-white">Strengths</h2>
+                  </div>
+                  <ul className="space-y-2">
+                    {analysis.strengths.map((strength) => (
+                      <li key={strength} className="text-gray-300 flex items-center gap-2">
+                        <HiOutlineCheckCircle className="w-4 h-4 text-green-400" />
+                        <span>{strength}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                <div className="p-6 rounded-lg bg-[#0a1120]/50">
+                  <div className="flex items-center gap-3 mb-4">
+                    <HiOutlineChartBar className="w-6 h-6 text-yellow-400" />
+                    <h2 className="text-xl font-semibold text-white">Areas for Improvement</h2>
+                  </div>
+                  <ul className="space-y-2">
+                    {analysis.improvements.map((improvement) => (
+                      <li key={improvement} className="text-gray-300 flex items-center gap-2">
+                        <HiOutlineCheckCircle className="w-4 h-4 text-yellow-400" />
+                        <span>{improvement}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </motion.div>
+
+              {/* View Jobs Button */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+                className="flex justify-center pt-8"
+              >
+                <button
+                  onClick={() => navigate('/jobs')}
+                  className="inline-flex items-center px-6 py-3 text-lg font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg transition-colors group"
+                >
+                  View Matching Jobs
+                  <HiArrowRight className="ml-2 w-5 h-5 transform group-hover:translate-x-1 transition-transform" />
+                </button>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </div>
   );

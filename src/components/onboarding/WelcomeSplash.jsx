@@ -4,49 +4,65 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { HiOutlineLightBulb, HiOutlineDocumentSearch, HiOutlineClipboardCheck } from 'react-icons/hi';
 import RollyIcon from '../shared/RollyIcon';
+import AuthModal from '../auth/AuthModal';
 
-const FeatureHighlight = ({ icon: Icon, title, description, delay }) => (
-  <motion.div
-    className="flex items-start space-x-4 text-left"
-    initial={{ opacity: 0, y: 20 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{ delay }}
-  >
-    <div className="flex-shrink-0">
-      <div className="p-3 bg-indigo-100 rounded-lg">
-        <Icon className="w-6 h-6 text-indigo-600" />
+const FeatureHighlight = ({ icon: Icon, title, description, delay }) => {
+  return (
+    <motion.div
+      className="flex items-start gap-4"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay }}
+    >
+      <div className="flex-shrink-0">
+        <Icon className="w-6 h-6 text-indigo-400" />
       </div>
-    </div>
-    <div>
-      <h3 className="font-medium text-gray-900">{title}</h3>
-      <p className="mt-1 text-sm text-gray-500">{description}</p>
-    </div>
-  </motion.div>
-);
+      <div className="flex-1 text-left">
+        <h3 className="font-medium text-white">{title}</h3>
+        <p className="text-sm text-gray-300">{description}</p>
+      </div>
+    </motion.div>
+  );
+};
 
 const WelcomeSplash = () => {
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(true);
+  const [showAuthModal, setShowAuthModal] = useState(false);
 
   const features = [
     {
-      icon: HiOutlineDocumentSearch,
-      title: "Smart Resume Analysis",
-      description: "Our AI analyzes your resume to match you with the perfect job opportunities.",
+      icon: HiOutlineLightBulb,
+      title: 'Smart Job Matching',
+      description: 'AI-powered recommendations based on your skills and experience'
     },
     {
-      icon: HiOutlineLightBulb,
-      title: "AI-Powered Recommendations",
-      description: "Get personalized suggestions to improve your resume and boost your chances.",
+      icon: HiOutlineDocumentSearch,
+      title: 'Resume Analysis',
+      description: 'Get instant feedback and improvement suggestions'
     },
     {
       icon: HiOutlineClipboardCheck,
-      title: "Tailored Job Matching",
-      description: "Find roles that match your skills, experience, and career goals.",
-    },
+      title: 'Application Tracking',
+      description: 'Keep track of your applications and follow-ups'
+    }
   ];
 
   const handleGetStarted = () => {
+    setShowAuthModal(true);
+  };
+
+  const handleAuthSuccess = () => {
+    setShowAuthModal(false);
+    setIsOpen(false);
+    navigate('/home');
+  };
+
+  const handleAuthClose = () => {
+    setShowAuthModal(false);
+  };
+
+  const handleSkip = () => {
     setIsOpen(false);
     navigate('/home');
   };
@@ -69,7 +85,7 @@ const WelcomeSplash = () => {
             className="fixed inset-0"
           >
             {/* Gradient background */}
-            <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-gray-900 to-indigo-900" />
+            <div className="absolute inset-0 bg-[#0f172a]" />
             
             {/* Animated particles */}
             {[...Array(20)].map((_, i) => (
@@ -102,7 +118,7 @@ const WelcomeSplash = () => {
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="relative bg-white/90 backdrop-blur-xl rounded-2xl shadow-2xl max-w-2xl w-full p-8 overflow-hidden"
+              className="relative bg-[#0a1120]/50 backdrop-blur-xl rounded-2xl shadow-2xl max-w-2xl w-full p-8 overflow-hidden"
             >
               {/* Animated Logo */}
               <motion.div 
@@ -124,7 +140,7 @@ const WelcomeSplash = () => {
                 <Dialog.Title className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-indigo-400 mb-4">
                   Welcome to RoleArc
                 </Dialog.Title>
-                <Dialog.Description className="text-lg text-gray-600 max-w-xl mx-auto">
+                <Dialog.Description className="text-lg text-gray-300 max-w-xl mx-auto">
                   Your AI-powered career companion. We scan your resume and deliver smart, personalized job matches to help you land your next big opportunity.
                 </Dialog.Description>
               </motion.div>
@@ -142,7 +158,7 @@ const WelcomeSplash = () => {
                 ))}
               </div>
 
-              {/* Action Button */}
+              {/* Action Buttons */}
               <motion.div 
                 className="flex flex-col items-center gap-2"
                 initial={{ opacity: 0, y: 20 }}
@@ -151,25 +167,28 @@ const WelcomeSplash = () => {
               >
                 <button
                   onClick={handleGetStarted}
-                  className="px-6 py-3 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-500 transition-colors"
+                  className="px-6 py-3 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition-colors"
                 >
                   Get Started
                 </button>
-                {/* Neetly credit */}
-                <p className="text-xs text-gray-400/60 mt-4">
-                  Made possible by{' '}
-                  <a
-                    href="https://www.neetly.co"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-indigo-400/80 hover:text-indigo-300 transition-colors"
-                  >
-                    Neetly
-                  </a>
-                </p>
+                <button
+                  onClick={handleSkip}
+                  className="text-gray-400 hover:text-gray-300 transition-colors text-sm mt-2"
+                >
+                  Skip for now
+                </button>
               </motion.div>
             </Dialog.Panel>
           </div>
+
+          {/* Auth Modal */}
+          {showAuthModal && (
+            <AuthModal
+              isOpen={showAuthModal}
+              onClose={handleAuthClose}
+              onSuccess={handleAuthSuccess}
+            />
+          )}
         </Dialog>
       )}
     </AnimatePresence>

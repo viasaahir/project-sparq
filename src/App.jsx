@@ -10,7 +10,7 @@ import { MapPinIcon } from '@heroicons/react/24/outline';
 function App() {
   return (
     <BrowserRouter>
-      <div className="min-h-screen w-full bg-gray-50">
+      <div className="min-h-screen w-full bg-[#0f172a]">
         {/* Top Navigation Bar */}
         <div className="bg-black border-b border-gray-800">
           <div className="max-w-7xl mx-auto px-4 py-1.5 sm:px-6 lg:px-8">
