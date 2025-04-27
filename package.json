@@ -13,12 +13,14 @@
     "@headlessui/react": "^1.7.19",
     "@heroicons/react": "^2.2.0",
     "autoprefixer": "^10.4.16",
+    "axios": "^1.9.0",
     "framer-motion": "^10.18.0",
     "postcss": "^8.4.31",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-dropzone": "^14.3.8",
     "react-icons": "^5.5.0",
+    "react-router-dom": "^7.5.2",
     "tailwindcss": "^3.3.3"
   },
   "devDependencies": {

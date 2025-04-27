@@ -1,51 +1,59 @@
-import React, { useState, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useCallback, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
-import { FiUpload, FiFile, FiCheck, FiLoader } from 'react-icons/fi';
-import { HiOutlineLightningBolt, HiOutlineDocumentSearch, HiOutlineClipboardCheck } from 'react-icons/hi';
+import { motion } from 'framer-motion';
+import { HiOutlineUpload, HiOutlineLightningBolt, HiOutlineDocumentSearch, HiOutlineClipboardCheck } from 'react-icons/hi';
+import { Link } from 'react-router-dom';
 
-const AnalysisStep = ({ icon: Icon, title, status }) => (
-  <motion.div
-    className={`flex items-center space-x-3 ${
-      status === 'complete' ? 'text-green-600' :
-      status === 'processing' ? 'text-indigo-600' :
-      'text-gray-400'
-    }`}
-    initial={{ opacity: 0, x: -20 }}
-    animate={{ opacity: 1, x: 0 }}
-  >
-    <div className="flex-shrink-0">
-      {status === 'complete' ? (
-        <FiCheck className="w-5 h-5" />
-      ) : status === 'processing' ? (
-        <motion.div
-          animate={{ rotate: 360 }}
-          transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-        >
-          <FiLoader className="w-5 h-5" />
-        </motion.div>
-      ) : (
-        <Icon className="w-5 h-5" />
-      )}
-    </div>
-    <span className="text-sm font-medium">{title}</span>
-  </motion.div>
-);
-
-const ResumeUpload = () => {
+const ResumeUpload = ({ onUploadComplete }) => {
   const [file, setFile] = useState(null);
+  const [uploadStatus, setUploadStatus] = useState('idle');
+  const [isHovering, setIsHovering] = useState(false);
   const [analysisSteps, setAnalysisSteps] = useState([
-    { icon: HiOutlineDocumentSearch, title: 'Extracting Skills & Experience', status: 'pending' },
-    { icon: HiOutlineLightningBolt, title: 'Finding Job Matches', status: 'pending' },
+    { icon: HiOutlineLightningBolt, title: 'Processing Resume', status: 'pending' },
+    { icon: HiOutlineDocumentSearch, title: 'Extracting Skills', status: 'pending' },
     { icon: HiOutlineClipboardCheck, title: 'Generating Recommendations', status: 'pending' }
   ]);
 
-  const onDrop = useCallback(acceptedFiles => {
+  const onDrop = useCallback((acceptedFiles) => {
     if (acceptedFiles?.length) {
       setFile(acceptedFiles[0]);
-      simulateAnalysis();
+      setUploadStatus('uploading');
+      setTimeout(() => {
+        setUploadStatus('analyzing');
+        simulateAnalysis();
+      }, 1500);
     }
   }, []);
+
+  const simulateAnalysis = () => {
+    setTimeout(() => {
+      setAnalysisSteps(steps => steps.map((step, i) => 
+        i === 0 ? { ...step, status: 'processing' } : step
+      ));
+    }, 1000);
+
+    setTimeout(() => {
+      setAnalysisSteps(steps => steps.map((step, i) => 
+        i === 0 ? { ...step, status: 'complete' } : 
+        i === 1 ? { ...step, status: 'processing' } : step
+      ));
+    }, 3000);
+
+    setTimeout(() => {
+      setAnalysisSteps(steps => steps.map((step, i) => 
+        i <= 1 ? { ...step, status: 'complete' } : 
+        i === 2 ? { ...step, status: 'processing' } : step
+      ));
+    }, 5000);
+
+    setTimeout(() => {
+      setAnalysisSteps(steps => steps.map(step => ({ ...step, status: 'complete' })));
+      setUploadStatus('complete');
+      if (onUploadComplete) {
+        onUploadComplete();
+      }
+    }, 6000);
+  };
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
@@ -54,91 +62,107 @@ const ResumeUpload = () => {
       'application/msword': ['.doc'],
       'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx']
     },
-    maxFiles: 1
+    maxFiles: 1,
+    onDragEnter: () => setIsHovering(true),
+    onDragLeave: () => setIsHovering(false),
+    onDropAccepted: () => setIsHovering(false)
   });
 
-  const simulateAnalysis = () => {
-    // Simulate the analysis process with delays
-    setAnalysisSteps(steps => steps.map((step, i) => 
-      i === 0 ? { ...step, status: 'processing' } : step
-    ));
-
-    setTimeout(() => {
-      setAnalysisSteps(steps => steps.map((step, i) => 
-        i === 0 ? { ...step, status: 'complete' } :
-        i === 1 ? { ...step, status: 'processing' } : step
-      ));
-    }, 2000);
-
-    setTimeout(() => {
-      setAnalysisSteps(steps => steps.map((step, i) => 
-        i === 1 ? { ...step, status: 'complete' } :
-        i === 2 ? { ...step, status: 'processing' } : step
-      ));
-    }, 4000);
-
-    setTimeout(() => {
-      setAnalysisSteps(steps => steps.map(step => ({ ...step, status: 'complete' })));
-      // Here we would navigate to the results page
-    }, 6000);
-  };
-
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="max-w-2xl mx-auto p-6"
-    >
-      <div className="text-center mb-8">
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">Upload Your Resume</h2>
-        <p className="text-gray-600">
-          We'll analyze your resume and find the best matching opportunities
-        </p>
-      </div>
+    <div className="min-h-[calc(100vh-4rem)] bg-primary-900 flex flex-col items-center justify-center p-8">
+      <div className="max-w-3xl w-full mx-auto text-center">
+        {/* Header */}
+        <motion.div
+          className="mb-12"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          <h1 className="text-4xl font-bold text-white mb-4">
+            Welcome to RoleArc
+          </h1>
+          <p className="text-xl text-gray-300 mb-6">
+            Get personalized job matches by uploading your resume
+          </p>
+        </motion.div>
 
-      <div
-        {...getRootProps()}
-        className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors
-          ${isDragActive ? 'border-indigo-500 bg-indigo-50' : 'border-gray-300 hover:border-indigo-400'}
-          ${file ? 'border-green-500 bg-green-50' : ''}`}
-      >
-        <input {...getInputProps()} />
-        
-        {file ? (
-          <div className="space-y-4">
-            <div className="flex items-center justify-center space-x-3 text-green-600">
-              <FiFile className="w-8 h-8" />
-              <span className="font-medium">{file.name}</span>
-            </div>
+        {/* Upload Area */}
+        <div className="relative">
+          <motion.div
+            {...getRootProps()}
+            className={`
+              relative rounded-xl border-2 border-dashed p-12 text-center
+              ${isDragActive ? 'border-indigo-400 bg-indigo-400/10' : 'border-gray-600 hover:border-indigo-500'}
+              ${file ? 'border-green-500 bg-green-50/10' : ''}
+              transition-colors cursor-pointer
+            `}
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.2 }}
+          >
+            <input {...getInputProps()} />
             
-            <div className="space-y-3">
-              {analysisSteps.map((step, index) => (
-                <AnalysisStep
-                  key={index}
-                  icon={step.icon}
-                  title={step.title}
-                  status={step.status}
-                />
-              ))}
+            <div className="space-y-4">
+              <div className="flex flex-col items-center gap-4">
+                <motion.div
+                  className="w-16 h-16 border-2 border-dashed border-indigo-400 rounded-lg flex items-center justify-center"
+                  animate={isHovering ? { scale: [1, 1.1, 1] } : {}}
+                  transition={{ duration: 0.5, repeat: Infinity }}
+                >
+                  <HiOutlineUpload className="w-8 h-8 text-indigo-400" />
+                </motion.div>
+                <div className="space-y-2">
+                  <p className="text-lg font-medium text-white">
+                    {file ? file.name :
+                      uploadStatus === 'idle' ? 'Drop your resume here' :
+                      uploadStatus === 'uploading' ? 'Uploading...' :
+                      uploadStatus === 'analyzing' ? 'Analyzing your resume...' :
+                      'Analysis complete!'
+                    }
+                  </p>
+                  <p className="text-sm text-gray-400">
+                    Support for PDF, DOC, and DOCX files
+                  </p>
+                </div>
+              </div>
+
+              {/* Analysis Steps */}
+              {file && (
+                <motion.div 
+                  className="mt-8 space-y-4"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                >
+                  {analysisSteps.map((step, index) => (
+                    <div
+                      key={step.title}
+                      className="flex items-center justify-center gap-3 text-gray-300"
+                    >
+                      <step.icon className={`w-5 h-5 ${
+                        step.status === 'complete' ? 'text-green-400' :
+                        step.status === 'processing' ? 'text-indigo-400 animate-pulse' :
+                        'text-gray-500'
+                      }`} />
+                      <span>{step.title}</span>
+                    </div>
+                  ))}
+                </motion.div>
+              )}
             </div>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            <div className="flex justify-center">
-              <FiUpload className="w-12 h-12 text-gray-400" />
-            </div>
-            <div>
-              <p className="text-lg font-medium text-gray-700">
-                Drop your resume here, or <span className="text-indigo-600">browse</span>
-              </p>
-              <p className="text-sm text-gray-500 mt-1">
-                Supports PDF, DOC, DOCX (up to 10MB)
-              </p>
-            </div>
-          </div>
-        )}
+
+            {/* Upload Progress Indicator */}
+            {uploadStatus !== 'idle' && (
+              <motion.div
+                className="absolute inset-x-0 bottom-0 h-1 bg-indigo-500/20"
+                initial={{ scaleX: 0 }}
+                animate={{ scaleX: uploadStatus === 'complete' ? 1 : [0, 0.5, 0.8] }}
+                transition={{ duration: uploadStatus === 'complete' ? 0.5 : 2, repeat: uploadStatus === 'complete' ? 0 : Infinity }}
+              />
+            )}
+          </motion.div>
+        </div>
       </div>
-    </motion.div>
+    </div>
   );
 };
 
