@@ -1,19 +1,32 @@
-import React, { useState } from 'react';
+import React, { useState, Fragment } from 'react';
 import { motion } from 'framer-motion';
+import { Combobox, Transition } from '@headlessui/react';
+import { HiCheck, HiChevronUpDown } from 'react-icons/hi2';
 import { HiOutlineLightningBolt, HiOutlineAcademicCap, HiOutlineTrendingUp } from 'react-icons/hi';
-import { analyzeCareerTransition, getRecommendedJobTitles } from '../../services/careerTransitionService';
+import { careerPaths, analyzeCareerTransition, getRecommendedJobTitles } from '../../services/careerTransitionService';
 
 const CareerTransition = () => {
-  const [currentRole, setCurrentRole] = useState('');
+  const [selectedRole, setSelectedRole] = useState('');
   const [skills, setSkills] = useState([]);
   const [transitionPaths, setTransitionPaths] = useState([]);
   const [analyzing, setAnalyzing] = useState(false);
+  const [query, setQuery] = useState('');
+
+  const allRoles = Object.values(careerPaths)
+    .flatMap(industry => industry.roles)
+    .sort();
+
+  const filteredRoles = query === ''
+    ? allRoles
+    : allRoles.filter(role =>
+        role.toLowerCase().includes(query.toLowerCase())
+      );
 
   const handleAnalyze = () => {
     setAnalyzing(true);
     // Simulate API call delay
     setTimeout(() => {
-      const paths = analyzeCareerTransition(currentRole, skills);
+      const paths = analyzeCareerTransition(selectedRole, skills);
       setTransitionPaths(paths);
       setAnalyzing(false);
     }, 1500);
@@ -29,22 +42,65 @@ const CareerTransition = () => {
         </h2>
         
         <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">
-              Current Role
-            </label>
-            <select
-              value={currentRole}
-              onChange={(e) => setCurrentRole(e.target.value)}
-              className="w-full bg-white/10 rounded-lg border border-gray-700 text-white py-2 px-3 focus:ring-2 focus:ring-indigo-500"
-            >
-              <option value="">Select your current role</option>
-              <option value="Doctor">Doctor</option>
-              <option value="Nurse">Nurse</option>
-              <option value="Pharmacist">Pharmacist</option>
-              <option value="Financial Analyst">Financial Analyst</option>
-              <option value="Research Scientist">Research Scientist</option>
-            </select>
+          <div className="mb-8">
+            <Combobox value={selectedRole} onChange={setSelectedRole}>
+              <div className="relative mt-1">
+                <div className="relative w-full cursor-default overflow-hidden rounded-lg bg-gray-900 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-white/75 focus-visible:ring-offset-2 focus-visible:ring-offset-indigo-300 sm:text-sm">
+                  <Combobox.Input
+                    className="w-full border-none py-2 pl-3 pr-10 text-sm leading-5 text-gray-300 bg-gray-900 focus:ring-0"
+                    displayValue={(role) => role}
+                    onChange={(event) => setQuery(event.target.value)}
+                    placeholder="Search for your current role..."
+                  />
+                  <Combobox.Button className="absolute inset-y-0 right-0 flex items-center pr-2">
+                    <HiChevronUpDown
+                      className="h-5 w-5 text-gray-400"
+                      aria-hidden="true"
+                    />
+                  </Combobox.Button>
+                </div>
+                <Transition
+                  as={Fragment}
+                  leave="transition ease-in duration-100"
+                  leaveFrom="opacity-100"
+                  leaveTo="opacity-0"
+                  afterLeave={() => setQuery('')}
+                >
+                  <Combobox.Options className="absolute mt-1 max-h-60 w-full overflow-auto rounded-md bg-gray-900 py-1 text-base shadow-lg ring-1 ring-black/5 focus:outline-none sm:text-sm">
+                    {filteredRoles.length === 0 && query !== '' ? (
+                      <div className="relative cursor-default select-none px-4 py-2 text-gray-400">
+                        Nothing found.
+                      </div>
+                    ) : (
+                      filteredRoles.map((role) => (
+                        <Combobox.Option
+                          key={role}
+                          className={({ active }) =>
+                            `relative cursor-default select-none py-2 pl-10 pr-4 ${active ? 'bg-indigo-600 text-white' : 'text-gray-300'}`
+                          }
+                          value={role}
+                        >
+                          {({ selected, active }) => (
+                            <>
+                              <span className={`block truncate ${selected ? 'font-medium' : 'font-normal'}`}>
+                                {role}
+                              </span>
+                              {selected ? (
+                                <span
+                                  className={`absolute inset-y-0 left-0 flex items-center pl-3 ${active ? 'text-white' : 'text-indigo-500'}`}
+                                >
+                                  <HiCheck className="h-5 w-5" aria-hidden="true" />
+                                </span>
+                              ) : null}
+                            </>
+                          )}
+                        </Combobox.Option>
+                      ))
+                    )}
+                  </Combobox.Options>
+                </Transition>
+              </div>
+            </Combobox>
           </div>
 
           <div>

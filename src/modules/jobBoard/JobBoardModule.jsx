@@ -37,9 +37,9 @@ const JobBoardModule = () => {
   };
 
   return (
-    <div className="min-h-screen bg-black bg-opacity-95">
+    <div className="min-h-screen bg-gradient-to-b from-black via-black to-black/95">
       {/* Header with RoleArc branding */}
-      <div className="bg-gradient-to-b from-black to-gray-900 border-b border-gray-800">
+      <div className="bg-gradient-to-b from-black/20 to-transparent border-b border-gray-800/30">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex flex-col items-center justify-center text-center">
             <div className="flex items-center gap-4 mb-6">

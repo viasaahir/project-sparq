@@ -1,12 +1,12 @@
 // Career paths and their corresponding tech transitions
 export const careerPaths = {
   healthcare: {
-    roles: ['Doctor', 'Nurse', 'Pharmacist', 'Clinical Research Coordinator'],
+    roles: ['Doctor', 'Nurse', 'Pharmacist', 'Physical Therapist', 'Medical Researcher', 'Healthcare Administrator'],
     techTransitions: [
       {
         role: 'Health Tech Product Manager',
         matchingSkills: ['Patient Care', 'Clinical Workflows', 'Healthcare Regulations'],
-        requiredSkills: ['Agile Methodology', 'User Stories', 'Product Roadmapping'],
+        requiredSkills: ['Agile Methodology', 'User Stories', 'Healthcare Domain Knowledge'],
         timeToTransition: '6-12 months',
         avgSalary: 120000,
       },

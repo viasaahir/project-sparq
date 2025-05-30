@@ -18,7 +18,7 @@ const LandingHero = ({ onPathSelect }) => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
         >
-          Your Path to Tech Success
+          Level Up Your Tech Career 🚀
         </motion.h1>
         <motion.p 
           className="text-xl text-gray-400 max-w-2xl mx-auto"
@@ -26,7 +26,7 @@ const LandingHero = ({ onPathSelect }) => {
           animate={{ opacity: 1 }}
           transition={{ delay: 0.3 }}
         >
-          Whether you're a student or professional, we'll help you find your perfect role in tech
+          Ready to make waves in tech? From coding newbie to career switcher, we've got your next big move covered
         </motion.p>
       </div>
 
