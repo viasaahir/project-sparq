@@ -1,3 +1,5 @@
+@import './styles/scrollbar.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -13,8 +15,8 @@ body {
   padding: 0;
   width: 100%;
   min-height: 100vh;
-  background-color: rgb(249 250 251);
-  color: rgb(17 24 39);
+  background-color: rgb(3, 7, 18);
+  color: rgb(229, 231, 235);
 }
 
 :root {

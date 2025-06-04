@@ -1,147 +1,164 @@
-import React from 'react';
-import { motion } from 'framer-motion';
+import React, { useRef } from 'react';
+import { motion, useScroll, useTransform } from 'framer-motion';
 import { HiOutlineAcademicCap, HiOutlineRefresh, HiOutlineLightningBolt } from 'react-icons/hi';
+import { FiArrowRight, FiChevronRight } from 'react-icons/fi';
 
 const pathVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: 'easeOut' } }
+};
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.2
+    }
+  }
+};
+
+const itemVariants = {
   hidden: { opacity: 0, y: 20 },
   visible: { opacity: 1, y: 0 }
 };
 
-const LandingHero = ({ onPathSelect }) => {
+const LandingHero = ({ onUploadResume, onBrowseJobs }) => {
+  const containerRef = useRef(null);
+  const { scrollXProgress } = useScroll({
+    container: containerRef,
+    axis: "x"
+  });
   return (
-    <div className="space-y-12">
-      {/* Hero Section */}
-      <div className="text-center space-y-6">
-        <motion.h1 
-          className="text-4xl md:text-5xl font-bold text-white"
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-        >
-          Level Up Your Tech Career 🚀
-        </motion.h1>
-        <motion.p 
-          className="text-xl text-gray-400 max-w-2xl mx-auto"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.3 }}
-        >
-          Ready to make waves in tech? From coding newbie to career switcher, we've got your next big move covered
-        </motion.p>
+    <div className="min-h-screen flex flex-col">
+      <div className="relative flex-1 flex flex-col items-center justify-center px-4 py-12">
+        {/* Background Effects */}
+        <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 via-blue-500/10 to-emerald-500/10 blur-[100px] opacity-30 -z-10" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.05)_0%,transparent_70%)] -z-10" />
+        
+        <div className="max-w-4xl w-full mx-auto">
+          {/* Main Content */}
+          <motion.div
+            initial="hidden"
+            animate="visible"
+            variants={containerVariants}
+            className="space-y-12 text-center"
+          >
+            {/* Header */}
+            <div className="space-y-6">
+              <motion.h1
+                variants={itemVariants} 
+                className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-white via-gray-100 to-gray-300 bg-clip-text text-transparent"
+              >
+                Find Your Next Tech Role
+              </motion.h1>
+              <motion.p
+                variants={itemVariants}
+                className="text-xl text-gray-400"
+              >
+                AI-powered job matching for tech professionals
+              </motion.p>
+            </div>
+
+            {/* Upload Resume Card */}
+            <motion.div
+              variants={itemVariants}
+              className="bg-gradient-to-b from-gray-900/50 to-gray-900/30 backdrop-blur-sm border border-gray-800 rounded-2xl p-8 space-y-6"
+            >
+              <div className="flex items-center justify-center w-16 h-16 mx-auto rounded-2xl bg-gradient-to-br from-purple-500/20 to-blue-500/20 border border-gray-800">
+                <motion.span
+                  className="text-3xl"
+                  animate={{ 
+                    rotate: [0, -10, 10, -10, 0],
+                    scale: [1, 1.1, 0.9, 1.1, 1]
+                  }}
+                  transition={{ 
+                    duration: 2,
+                    repeat: Infinity,
+                    repeatDelay: 1
+                  }}
+                >
+                  🚀
+                </motion.span>
+              </div>
+              
+              <h2 className="text-2xl font-semibold text-white">Upload Your Resume</h2>
+              <p className="text-gray-400 max-w-lg mx-auto">
+                Let our AI analyze your resume and match you with relevant tech opportunities. Get personalized job recommendations in seconds.
+              </p>
+              
+              <motion.button
+                onClick={onUploadResume}
+                className="group relative inline-flex items-center gap-2 px-6 py-3 text-lg font-medium text-white bg-gradient-to-r from-purple-600 to-blue-600 rounded-xl hover:opacity-90 transition-opacity"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                Upload Resume
+                <FiArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-blue-600 blur-xl opacity-50 -z-10 group-hover:opacity-75 transition-opacity" />
+              </motion.button>
+            </motion.div>
+
+            {/* Browse Jobs Link */}
+            <motion.div
+              variants={itemVariants}
+              className="pt-4"
+            >
+              <button
+                onClick={onBrowseJobs}
+                className="text-gray-400 hover:text-white transition-colors inline-flex items-center gap-2 text-lg"
+              >
+                Or browse available jobs
+                <FiArrowRight className="w-4 h-4" />
+              </button>
+            </motion.div>
+          </motion.div>
+        </div>
       </div>
 
-      {/* Path Selection Cards */}
-      <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
-        {/* Student Path */}
-        <motion.div
-          variants={pathVariants}
-          initial="hidden"
-          animate="visible"
-          transition={{ delay: 0.4 }}
-          onClick={() => onPathSelect('student')}
-          className="group cursor-pointer relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-500/10 to-purple-600/10 border border-gray-800 hover:border-purple-500/50 transition-all duration-300"
-        >
-          <div className="absolute inset-0 bg-gradient-to-br from-purple-500/20 to-blue-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-          <div className="relative p-8 space-y-4">
-            <div className="w-12 h-12 rounded-xl bg-purple-500/20 flex items-center justify-center">
-              <HiOutlineAcademicCap className="w-6 h-6 text-purple-400" />
-            </div>
-            <h3 className="text-xl font-semibold text-white">Student Path</h3>
-            <p className="text-gray-400">Launch your tech career with internships and entry-level positions matched to your studies</p>
-            <ul className="space-y-2 text-sm text-gray-400">
-              <li className="flex items-center gap-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-purple-400" />
-                Internship opportunities
-              </li>
-              <li className="flex items-center gap-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-purple-400" />
-                Entry-level positions
-              </li>
-              <li className="flex items-center gap-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-purple-400" />
-                Resume building tips
-              </li>
-            </ul>
-            <div className="pt-4">
-              <span className="inline-flex items-center gap-2 text-purple-400 font-medium">
-                Explore Student Path
-                <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </span>
-            </div>
-          </div>
-        </motion.div>
 
-        {/* Career Transition Path */}
-        <motion.div
-          variants={pathVariants}
-          initial="hidden"
-          animate="visible"
-          transition={{ delay: 0.6 }}
-          onClick={() => onPathSelect('transition')}
-          className="group cursor-pointer relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-500/10 to-blue-600/10 border border-gray-800 hover:border-emerald-500/50 transition-all duration-300"
-        >
-          <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/20 to-blue-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-          <div className="relative p-8 space-y-4">
-            <div className="w-12 h-12 rounded-xl bg-emerald-500/20 flex items-center justify-center">
-              <HiOutlineRefresh className="w-6 h-6 text-emerald-400" />
-            </div>
-            <h3 className="text-xl font-semibold text-white">Career Transition</h3>
-            <p className="text-gray-400">Transform your existing experience into a rewarding tech career with personalized guidance</p>
-            <ul className="space-y-2 text-sm text-gray-400">
-              <li className="flex items-center gap-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                Skill mapping
-              </li>
-              <li className="flex items-center gap-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                Learning paths
-              </li>
-              <li className="flex items-center gap-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                Career roadmap
-              </li>
-            </ul>
-            <div className="pt-4">
-              <span className="inline-flex items-center gap-2 text-emerald-400 font-medium">
-                Start Transition
-                <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </span>
-            </div>
-          </div>
-        </motion.div>
-      </div>
 
       {/* Features Section */}
       <motion.div 
-        className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.8 }}
+        className="relative max-w-5xl mx-auto"
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
       >
-        <div className="text-center space-y-2">
-          <div className="w-10 h-10 rounded-lg bg-blue-500/20 flex items-center justify-center mx-auto">
-            <HiOutlineLightningBolt className="w-5 h-5 text-blue-400" />
-          </div>
-          <h4 className="font-medium text-white">AI-Powered Matching</h4>
-          <p className="text-sm text-gray-400">Smart algorithms to find your perfect role</p>
-        </div>
-        <div className="text-center space-y-2">
-          <div className="w-10 h-10 rounded-lg bg-purple-500/20 flex items-center justify-center mx-auto">
-            <HiOutlineAcademicCap className="w-5 h-5 text-purple-400" />
-          </div>
-          <h4 className="font-medium text-white">Learning Resources</h4>
-          <p className="text-sm text-gray-400">Curated content to build your skills</p>
-        </div>
-        <div className="text-center space-y-2">
-          <div className="w-10 h-10 rounded-lg bg-emerald-500/20 flex items-center justify-center mx-auto">
-            <HiOutlineRefresh className="w-5 h-5 text-emerald-400" />
-          </div>
-          <h4 className="font-medium text-white">Career Support</h4>
-          <p className="text-sm text-gray-400">Guidance throughout your journey</p>
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 via-purple-500/10 to-emerald-500/10 blur-2xl opacity-30 -z-10" />
+        <div className="grid md:grid-cols-3 gap-8">
+          <motion.div 
+            className="group relative p-6 rounded-xl bg-gradient-to-br from-blue-500/5 to-blue-600/5 border border-gray-800 hover:border-blue-500/50 transition-all duration-500 hover:shadow-lg hover:shadow-blue-500/10"
+            variants={itemVariants}
+          >
+            <div className="w-12 h-12 rounded-xl bg-blue-500/20 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+              <HiOutlineLightningBolt className="w-6 h-6 text-blue-400" />
+            </div>
+            <h4 className="text-lg font-semibold text-white mb-2">AI-Powered Matching</h4>
+            <p className="text-gray-400">Smart algorithms analyze your profile to find roles that perfectly match your skills and aspirations</p>
+          </motion.div>
+          
+          <motion.div 
+            className="group relative p-6 rounded-xl bg-gradient-to-br from-purple-500/5 to-purple-600/5 border border-gray-800 hover:border-purple-500/50 transition-all duration-500 hover:shadow-lg hover:shadow-purple-500/10"
+            variants={itemVariants}
+          >
+            <div className="w-12 h-12 rounded-xl bg-purple-500/20 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+              <HiOutlineAcademicCap className="w-6 h-6 text-purple-400" />
+            </div>
+            <h4 className="text-lg font-semibold text-white mb-2">Learning Resources</h4>
+            <p className="text-gray-400">Access curated learning paths and resources tailored to your career goals</p>
+          </motion.div>
+          
+          <motion.div 
+            className="group relative p-6 rounded-xl bg-gradient-to-br from-emerald-500/5 to-emerald-600/5 border border-gray-800 hover:border-emerald-500/50 transition-all duration-500 hover:shadow-lg hover:shadow-emerald-500/10"
+            variants={itemVariants}
+          >
+            <div className="w-12 h-12 rounded-xl bg-emerald-500/20 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+              <HiOutlineRefresh className="w-6 h-6 text-emerald-400" />
+            </div>
+            <h4 className="text-lg font-semibold text-white mb-2">Career Support</h4>
+            <p className="text-gray-400">Get personalized guidance and support throughout your career transition journey</p>
+          </motion.div>
         </div>
       </motion.div>
     </div>
