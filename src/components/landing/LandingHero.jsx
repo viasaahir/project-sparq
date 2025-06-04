@@ -2,6 +2,7 @@ import React, { useRef } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { HiOutlineAcademicCap, HiOutlineRefresh, HiOutlineLightningBolt } from 'react-icons/hi';
 import { FiArrowRight, FiChevronRight } from 'react-icons/fi';
+import AnimatedLightning from '../common/AnimatedLightning';
 
 const pathVariants = {
   hidden: { opacity: 0, y: 20 },
@@ -48,9 +49,10 @@ const LandingHero = ({ onUploadResume, onBrowseJobs }) => {
             <div className="space-y-6">
               <motion.h1
                 variants={itemVariants} 
-                className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-white via-gray-100 to-gray-300 bg-clip-text text-transparent"
+                className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-white via-gray-100 to-gray-300 bg-clip-text text-transparent inline-flex items-center gap-4"
               >
                 Find Your Next Tech Role
+                <AnimatedLightning />
               </motion.h1>
               <motion.p
                 variants={itemVariants}
@@ -66,20 +68,21 @@ const LandingHero = ({ onUploadResume, onBrowseJobs }) => {
               className="bg-gradient-to-b from-gray-900/50 to-gray-900/30 backdrop-blur-sm border border-gray-800 rounded-2xl p-8 space-y-6"
             >
               <div className="flex items-center justify-center w-16 h-16 mx-auto rounded-2xl bg-gradient-to-br from-purple-500/20 to-blue-500/20 border border-gray-800">
-                <motion.span
-                  className="text-3xl"
-                  animate={{ 
-                    rotate: [0, -10, 10, -10, 0],
-                    scale: [1, 1.1, 0.9, 1.1, 1]
-                  }}
-                  transition={{ 
-                    duration: 2,
-                    repeat: Infinity,
-                    repeatDelay: 1
-                  }}
+                <svg
+                  className="w-8 h-8 text-blue-400"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
                 >
-                  🚀
-                </motion.span>
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                  <polyline points="14 2 14 8 20 8" />
+                  <line x1="16" y1="13" x2="8" y2="13" />
+                  <line x1="16" y1="17" x2="8" y2="17" />
+                  <line x1="10" y1="9" x2="8" y2="9" />
+                </svg>
               </div>
               
               <h2 className="text-2xl font-semibold text-white">Upload Your Resume</h2>
